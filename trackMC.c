@@ -1,15 +1,16 @@
-//include header file TMath
+#include <TMath.h>
+
 //include header file algorithm
 
 // parameters that vould be modified
 //
-//define a constant integer n with a value 10000
-//define a float momentum with a value 83 - this will be in GeV
-//define a float field with a value 3 - this will be in Tesla
-//define a float maxRadius with a value 1.5 - this will be in meters
-// define a constant integer layers with a value 12 - this is number of layers in the tracker
-//define a float charge with a value 1 - this is in e
-//define a bool plotReciprocals with a value 0 - this will choose whether or not to plot reciprocals (1 to plot reciprocals, 0 to not)
+Int_t n = 10000; //number of trials
+Float_t momentum = 83; //GeV
+Float_t field = 3; //Tesla
+Float_t maxRadius = 1.5; //m
+Int_t layers = 12;
+Float_t charge = 1; //e
+Bool_t plotReciprocals = false; //true if need to plot reciprocals 
 
 //things we define below should not be modified
 
@@ -50,10 +51,7 @@ float absolute(float n){
 
 		return n;
 	}
-
 	return n*-1;
-	
-
 }
 
 /*
