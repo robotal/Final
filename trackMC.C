@@ -7,12 +7,12 @@
 // parameters that vould be modified
 //
 Int_t n = 10000; //number of trials
-Float_t momentum = 100; //GeV
+Float_t momentum = 1; //GeV
 Float_t field = 3; //Tesla
 Float_t maxRadius = 1.5; //m
 static const Int_t layers = 12;
 Float_t charge = 1; //e
-Bool_t plotReciprocals = true; //true if need to plot reciprocals 
+Bool_t plotReciprocals = false; //true if need to plot reciprocals 
 
 //things we define below should not be modified
 
@@ -139,7 +139,7 @@ void trackMC(){
 			float r = maxRadius/layers*j; //current radius
 
 
-			/*
+			
 			//A, B, and C for quadratic equation Ax^2+Bx+C = 0, used to determine intersection of the circle
 			//representing the current radius (x^2+y^2 = r^2) and the circle (x-a)^2+(y-b)^2=a^2+b^2;
 			float qA = 1+pow(a,2)/pow(b,2);
@@ -150,21 +150,6 @@ void trackMC(){
 
 			float y1 = -a/b*x1+pow(r,2)/(2*b); //The y-coordinate coresponding to the greater x coordinate (x1)
 			float y2 = -a/b*x2+pow(r,2)/(2*b); //The y-coordinate coresponding to the lesser x coordinate (x2)
-
-			*/
-			
-			float qA = 4 * (a**2 + b**2); //positive
-			float qB = -4 * r**2 * b;  //negative
-			float qC = 4 * r**4 - 4 * a**2 * r**2; //positive
-
-			float y1 = (-qB + sqrt(qB**2 - 4 * qA*qC))/(2*qA); //positive coord
-			float y2 = (-qB - sqrt(qB**2 - 4 * qA*qC))/(2*qA); //negative coord
-
-			float x1 = sqrt(r**2 - y1**2) * -1; //negative
-			float x2 = sqrt(r**2 - y2**2); //positive
-
-
-
 
 			//Compute r-phi coordinates
 			float phi1, phi2;
@@ -262,10 +247,12 @@ void trackMC(){
 
 		if(plotReciprocals){
 
+			cout << 1/pm << endl;
 			histo1->Fill(1/pm);
 		}
 		else{
 
+			cout << pm << endl;
 			histo1->Fill(pm);
 		}
 
