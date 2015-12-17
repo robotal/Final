@@ -6,13 +6,13 @@
 
 // parameters that vould be modified
 //
-Int_t n = 1000; //number of trials
-Float_t momentum = 83; //GeV
+Int_t n = 10000; //number of trials
+Float_t momentum = 100; //GeV
 Float_t field = 3; //Tesla
 Float_t maxRadius = 1.5; //m
 static const Int_t layers = 12;
 Float_t charge = 1; //e
-Bool_t plotReciprocals = false; //true if need to plot reciprocals 
+Bool_t plotReciprocals = true; //true if need to plot reciprocals 
 
 //things we define below should not be modified
 
@@ -53,7 +53,7 @@ float absolute(float n){
 
 		return n;
 	}
-	return n*-1;
+	return n*-1.0;
 }
 
 /*
@@ -82,7 +82,7 @@ void trackMC(){
 	c1->SetFillColor(42);
 
 	//calculate 1/2 the range of the histogram
-	float range = 4 * .000012*pow(momentum,2);
+	float range = .000012*pow(momentum,2);
 
 
 
@@ -115,7 +115,7 @@ void trackMC(){
 
 	//define radius as float radiusActual = pT /.3qB
 
-	Int_t radiusActual = momentum / (.3 * charge * field);	
+	Float_t radiusActual = momentum / (.3 * charge * field);	
 
 	//================================================
 	// Compute the actual radius of the particle's path (pT = .3qrB)
@@ -138,6 +138,8 @@ void trackMC(){
 		for(int j = 1; j <= layers; j++){
 			float r = maxRadius/layers*j; //current radius
 
+
+			/*
 			//A, B, and C for quadratic equation Ax^2+Bx+C = 0, used to determine intersection of the circle
 			//representing the current radius (x^2+y^2 = r^2) and the circle (x-a)^2+(y-b)^2=a^2+b^2;
 			float qA = 1+pow(a,2)/pow(b,2);
@@ -148,6 +150,21 @@ void trackMC(){
 
 			float y1 = -a/b*x1+pow(r,2)/(2*b); //The y-coordinate coresponding to the greater x coordinate (x1)
 			float y2 = -a/b*x2+pow(r,2)/(2*b); //The y-coordinate coresponding to the lesser x coordinate (x2)
+
+			*/
+			
+			float qA = 4 * (a**2 + b**2); //positive
+			float qB = -4 * r**2 * b;  //negative
+			float qC = 4 * r**4 - 4 * a**2 * r**2; //positive
+
+			float y1 = (-qB + sqrt(qB**2 - 4 * qA*qC))/(2*qA); //positive coord
+			float y2 = (-qB - sqrt(qB**2 - 4 * qA*qC))/(2*qA); //negative coord
+
+			float x1 = sqrt(r**2 - y1**2) * -1; //negative
+			float x2 = sqrt(r**2 - y2**2); //positive
+
+
+
 
 			//Compute r-phi coordinates
 			float phi1, phi2;
@@ -167,7 +184,7 @@ void trackMC(){
 
 			//smear the coordinates of x1-y1
 			float epsilon = 10*pow(10,-6); //error in measurement perpendicular to the radial segment
-			float Ephimax = 0; //atan(epsilon/r); //maximum error in phi
+			float Ephimax = atan(epsilon/r); //maximum error in phi
 
 			//"smear" the phi value pseudo-randomly according to a gaussian distribution
 			//define float efactor equal to random Gaus(0,1)
@@ -192,8 +209,6 @@ void trackMC(){
 
 			float erry1 = TMath::max(absolute(epsilon*cos(Ephimax)/cos(phi1)), absolute(epsilon/cos(phi1-Ephimax)));
 
-
-
 			//smear the coordinates of x2-y2
 			// //set efactor again to random Gaus(0,1)
 			
@@ -210,7 +225,6 @@ void trackMC(){
 			float Y2m = r*sin(phi2);
 			float erry2 = TMath::max(absolute(epsilon*cos(Ephimax)/cos(phi2)), absolute(epsilon/cos(phi2-Ephimax)));
 
-
 			//add values to u-v and error arrays
 			u[2*(j-1)] = X1m/(r*r);
 			v[2*(j-1)] = Y1m/(r*r);
@@ -220,9 +234,6 @@ void trackMC(){
 			u[2*(j-1)+1] = X2m/(r*r);
 			v[2*(j-1)+1] = Y2m/(r*r);
 			err[2*(j-1)+1] = erry2/(r*r);
-
-
-
 		}//end for loop over number of layers
 
 
@@ -255,16 +266,12 @@ void trackMC(){
 		}
 		else{
 
-			cout <<	"Momentum: " << pm << " Bin #: "  << histo1->Fill(pm) << endl;
+			histo1->Fill(pm);
 		}
 
 
 
 	}//end of loop on n
-
-	cout << "Entries: " + histo1->GetEntries() << endl;
-
-	cout << "Min :" << (momentum - range) << " Max: " << (momentum + range) << endl;
 
 	histo1->Fit("gaus");
 	//Fit the histogram to a gaussian distribution
